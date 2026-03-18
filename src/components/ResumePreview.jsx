@@ -1,41 +1,94 @@
-// src/components/ResumePreview.jsx
 import React from "react";
-import { Card, ListGroup } from "react-bootstrap";
+import { Card } from "react-bootstrap";
 
 export default function ResumePreview({ data }) {
   if (!data) return null;
+
   const skills = data.skills ? data.skills.split(",") : [];
 
-  const renderList = (label, array) => (
-    <>
-      <Card.Text><strong>{label}:</strong></Card.Text>
-      <ListGroup className="mb-3">
-        {array.map((item, idx) => <ListGroup.Item key={idx}>{item}</ListGroup.Item>)}
-      </ListGroup>
-    </>
-  );
+  const sectionTitleStyle = {
+    fontWeight: "bold",
+    borderBottom: "1px solid black",
+    paddingBottom: "4px",
+    marginTop: "20px",
+    marginBottom: "8px",
+    fontSize: "14px",
+    textTransform: "uppercase",
+  };
+
+  const bulletListStyle = {
+    paddingLeft: "20px",
+    marginTop: 0,
+    marginBottom: "15px",
+    textAlign: "justify",
+  };
 
   return (
-    <Card className="mt-4">
-      <Card.Body>
-        <Card.Title>{data.name}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted">
-          {data.email} | {data.phone} <br/>
-          <a href={data.linkedin} target="_blank" rel="noreferrer">{data.linkedin}</a> | <a href={data.github} target="_blank" rel="noreferrer">{data.github}</a>
-        </Card.Subtitle>
+    <Card className="p-4 mt-4" style={{ fontFamily: "'Arial', sans-serif", fontSize: "14px" }}>
+      {/* Name */}
+      <div style={{ fontWeight: "bold", fontSize: "20px", textAlign: "center", marginBottom: "6px" }}>
+        {data.name}
+      </div>
 
-        <Card.Text><strong>Professional Summary:</strong><br />{data.summary}</Card.Text>
+      {/* Contact info */}
+      <div style={{ fontSize: "12px", textAlign: "center", marginBottom: "15px" }}>
+        {data.email} &#8226; {data.phone} &#8226;{" "}
+        <a href={data.linkedin} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
+          {data.linkedin.replace(/^https?:\/\//, "")}
+        </a>{" "}
+        &#8226;{" "}
+        <a href={data.github} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
+          {data.github.replace(/^https?:\/\//, "")}
+        </a>
+      </div>
 
-        {renderList("Work Experience", data.experiences)}
-        {renderList("Projects", data.projects)}
-        {renderList("Education", data.educations)}
-        {renderList("Certifications", data.certifications)}
+      {/* Professional Summary */}
+      <div style={sectionTitleStyle}>Professional Summary</div>
+      <p style={{ textAlign: "justify", marginTop: 0 }}>{data.summary}</p>
 
-        <Card.Text><strong>Technical Skills:</strong></Card.Text>
-        <ListGroup>
-          {skills.map((s, idx) => <ListGroup.Item key={idx}>{s.trim()}</ListGroup.Item>)}
-        </ListGroup>
-      </Card.Body>
+      {/* Work Experience */}
+      <div style={sectionTitleStyle}>Work Experience</div>
+      <ul style={bulletListStyle}>
+        {data.experiences.map((item, idx) => (
+          <li key={idx} style={{ marginBottom: "6px" }}>
+            {item}
+          </li>
+        ))}
+      </ul>
+
+      {/* Projects */}
+      <div style={sectionTitleStyle}>Projects</div>
+      <ul style={bulletListStyle}>
+        {data.projects.map((item, idx) => (
+          <li key={idx} style={{ marginBottom: "6px" }}>
+            {item}
+          </li>
+        ))}
+      </ul>
+
+      {/* Education */}
+      <div style={sectionTitleStyle}>Education</div>
+      <ul style={bulletListStyle}>
+        {data.educations.map((item, idx) => (
+          <li key={idx} style={{ marginBottom: "6px" }}>
+            {item}
+          </li>
+        ))}
+      </ul>
+
+      {/* Certifications */}
+      <div style={sectionTitleStyle}>Certifications</div>
+      <ul style={bulletListStyle}>
+        {data.certifications.map((item, idx) => (
+          <li key={idx} style={{ marginBottom: "6px" }}>
+            {item}
+          </li>
+        ))}
+      </ul>
+
+      {/* Technical Skills */}
+      <div style={sectionTitleStyle}>Technical Skills</div>
+      <p style={{ marginTop: 0 }}>{skills.map((s) => s.trim()).join(", ")}</p>
     </Card>
   );
 }

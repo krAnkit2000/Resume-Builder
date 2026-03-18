@@ -1,4 +1,3 @@
-// src/components/DownloadButtons.jsx
 import React from "react";
 import { Button } from "react-bootstrap";
 import { jsPDF } from "jspdf";
@@ -11,53 +10,131 @@ export default function DownloadButtons({ data }) {
     const doc = new jsPDF();
     let y = 10;
 
-    doc.setFontSize(16);
-    doc.text(data.name, 10, y); y += 10;
-    doc.setFontSize(12);
-    doc.text(`${data.email} | ${data.phone}`, 10, y); y += 7;
-    doc.text(`LinkedIn: ${data.linkedin} | GitHub: ${data.github}`, 10, y); y += 10;
+    // Name - center and bold, size 20
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text(data.name, 105, y, { align: "center" });
+    y += 10;
 
-    doc.text("Professional Summary:", 10, y); y += 7;
-    doc.text(data.summary, 10, y); y += 10;
+    // Contact - smaller font, centered
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    const contactLine = `${data.email} • ${data.phone} • LinkedIn: ${data.linkedin} • GitHub: ${data.github}`;
+    doc.text(contactLine, 105, y, { align: "center", maxWidth: 190 });
+    y += 12;
 
-    const renderArray = (label, array) => {
-      doc.text(`${label}:`, 10, y); y += 7;
-      array.forEach(item => { doc.text("- " + item, 12, y); y += 7; });
-      y += 5;
+    const drawSectionTitle = (title) => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text(title.toUpperCase(), 10, y);
+      y += 3;
+      doc.setLineWidth(0.5);
+      doc.line(10, y, 200, y);
+      y += 6;
     };
 
-    renderArray("Work Experience", data.experiences);
-    renderArray("Projects", data.projects);
-    renderArray("Education", data.educations);
-    renderArray("Certifications", data.certifications);
+    const drawBullets = (items) => {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      items.forEach((item) => {
+        const lines = doc.splitTextToSize(item, 180);
+        lines.forEach((line, i) => {
+          if (i === 0) doc.text(`• ${line}`, 15, y);
+          else doc.text(line, 20, y);
+          y += 6;
+        });
+        y += 3;
+      });
+    };
 
-    doc.text("Technical Skills: " + data.skills, 10, y);
+    // Professional Summary
+    drawSectionTitle("Professional Summary");
+    const summaryLines = doc.splitTextToSize(data.summary, 190);
+    summaryLines.forEach((line) => {
+      doc.text(line, 10, y);
+      y += 6;
+    });
+    y += 5;
+
+    // Other sections
+    const sections = [
+      { title: "Work Experience", items: data.experiences },
+      { title: "Projects", items: data.projects },
+      { title: "Education", items: data.educations },
+      { title: "Certifications", items: data.certifications },
+    ];
+
+    sections.forEach(({ title, items }) => {
+      drawSectionTitle(title);
+      drawBullets(items);
+    });
+
+    // Technical Skills
+    drawSectionTitle("Technical Skills");
+    const skillsText = data.skills.split(",").map((s) => s.trim()).join(", ");
+    const skillLines = doc.splitTextToSize(skillsText, 190);
+    skillLines.forEach((line) => {
+      doc.text(line, 10, y);
+      y += 6;
+    });
 
     doc.save("resume.pdf");
   };
 
   const downloadWord = async () => {
+    const createSectionTitle = (text) =>
+      new Paragraph({
+        text: text.toUpperCase(),
+        bold: true,
+        spacing: { before: 200, after: 100 },
+        thematicBreak: true,
+      });
+
+    const createBullets = (items) =>
+      items.map(
+        (item) =>
+          new Paragraph({
+            text: item,
+            bullet: { level: 0 },
+            spacing: { after: 100 },
+          })
+      );
+
     const doc = new Document({
-      sections: [{
-        properties: {},
-        children: [
-          new Paragraph({ children: [new TextRun({ text: data.name, bold: true })] }),
-          new Paragraph(`${data.email} | ${data.phone}`),
-          new Paragraph(`LinkedIn: ${data.linkedin} | GitHub: ${data.github}`),
-          new Paragraph("Professional Summary:"),
-          new Paragraph(data.summary),
-          new Paragraph("Work Experience:"),
-          ...data.experiences.map(e => new Paragraph("- " + e)),
-          new Paragraph("Projects:"),
-          ...data.projects.map(p => new Paragraph("- " + p)),
-          new Paragraph("Education:"),
-          ...data.educations.map(ed => new Paragraph("- " + ed)),
-          new Paragraph("Certifications:"),
-          ...data.certifications.map(c => new Paragraph("- " + c)),
-          new Paragraph("Technical Skills:"),
-          ...data.skills.split(",").map(s => new Paragraph(s.trim())),
-        ]
-      }]
+      sections: [
+        {
+          children: [
+            new Paragraph({
+              children: [new TextRun({ text: data.name, bold: true, size: 36 })],
+              alignment: "center",
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: `${data.email} • ${data.phone} • LinkedIn: ${data.linkedin} • GitHub: ${data.github}`,
+              alignment: "center",
+              spacing: { after: 200 },
+            }),
+
+            createSectionTitle("Professional Summary"),
+            new Paragraph({ text: data.summary, spacing: { after: 200 } }),
+
+            createSectionTitle("Work Experience"),
+            ...createBullets(data.experiences),
+
+            createSectionTitle("Projects"),
+            ...createBullets(data.projects),
+
+            createSectionTitle("Education"),
+            ...createBullets(data.educations),
+
+            createSectionTitle("Certifications"),
+            ...createBullets(data.certifications),
+
+            createSectionTitle("Technical Skills"),
+            new Paragraph({ text: data.skills }),
+          ],
+        },
+      ],
     });
 
     const blob = await Packer.toBlob(doc);
@@ -71,8 +148,12 @@ export default function DownloadButtons({ data }) {
 
   return (
     <div className="mt-3">
-      <Button className="me-2" variant="success" onClick={downloadPDF}>Download PDF</Button>
-      <Button variant="warning" onClick={downloadWord}>Download Word</Button>
+      <Button className="me-2" variant="success" onClick={downloadPDF}>
+        Download PDF
+      </Button>
+      <Button variant="warning" onClick={downloadWord}>
+        Download Word
+      </Button>
     </div>
   );
 }
