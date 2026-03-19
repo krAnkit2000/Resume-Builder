@@ -12,7 +12,7 @@ export default function ResumePreview({ data }) {
     paddingBottom: "4px",
     marginTop: "20px",
     marginBottom: "8px",
-    fontSize: "14px",
+    fontSize: "15px",
     textTransform: "uppercase",
   };
 
@@ -26,7 +26,7 @@ export default function ResumePreview({ data }) {
   return (
     <Card className="p-4 mt-4" style={{ fontFamily: "'Arial', sans-serif", fontSize: "14px" }}>
       {/* Name */}
-      <div style={{ fontWeight: "bold", fontSize: "20px", textAlign: "center", marginBottom: "6px" }}>
+      <div style={{ fontWeight: "bold", fontSize: "30px", textAlign: "center", marginBottom: "6px" }}>
         {data.name}
       </div>
 
